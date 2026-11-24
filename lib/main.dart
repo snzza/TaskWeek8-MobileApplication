@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
@@ -11,33 +10,23 @@ import 'screens/login_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Init Firebase dulu sebelum runApp.
-  // Web pakai options dari firebase_options.dart.
-  // Android pakai google-services.json di android/app/.
+  // Init Firebase dulu sebelum runApp, sesuai materi.
   String? initError;
   try {
-    if (kIsWeb) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-    } else {
-      await Firebase.initializeApp();
-    }
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     initError = e.toString();
   }
 
   // Daftarkan handler untuk pesan saat aplikasi background / mati.
-  if (initError == null && !kIsWeb) {
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  }
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   runApp(MyApp(initError: initError));
 
   // Inisialisasi notifikasi (izin, token, listener).
-  if (initError == null && !kIsWeb) {
-    await NotificationService.init();
-  }
+  await NotificationService.init();
 }
 
 class MyApp extends StatelessWidget {

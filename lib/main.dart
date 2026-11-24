@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: 'Firebase Agit',
+      title: 'Firebase Rico',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

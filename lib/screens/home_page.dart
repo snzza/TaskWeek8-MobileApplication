@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../fcm_token_card.dart';
+
 // Halaman home: nampilin profil user. Datanya dari Firebase:
 // - email + UID dari Firebase Auth (user yang login)
 // - nama + role + NIM + kelas dari Firestore, dokumen users/<uid>
@@ -58,8 +60,7 @@ class _HomePageState extends State<HomePage> {
           if (data['nim'] is String && (data['nim'] as String).isNotEmpty) {
             nim = data['nim'] as String;
           }
-          if (data['kelas'] is String &&
-              (data['kelas'] as String).isNotEmpty) {
+          if (data['kelas'] is String && (data['kelas'] as String).isNotEmpty) {
             kelas = data['kelas'] as String;
           }
         }
@@ -109,10 +110,9 @@ class _HomePageState extends State<HomePage> {
     final user = FirebaseAuth.instance.currentUser;
     try {
       if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({'name': result}, SetOptions(merge: true));
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': result,
+        }, SetOptions(merge: true));
       }
       if (!mounted) return;
       setState(() => userName = result);
@@ -147,107 +147,108 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _memuat
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    userName,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey,
+                      child: Icon(Icons.person, size: 50, color: Colors.white),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    role,
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'NIM: $nim  •  Kelas: $kelas',
-                    style: TextStyle(fontSize: 15, color: Colors.grey[700]),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Text(
-                      _error!,
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.email, color: Colors.teal),
-                      title: Text(user?.email ?? '-'),
-                      subtitle: Text('UID: ${user?.uid ?? '-'}'),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _editNama,
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Edit Profil'),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.teal[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _StatItem(count: '15', label: 'Proyek'),
-                        SizedBox(width: 24),
-                        _StatItem(count: '1.2K', label: 'Followers'),
-                        SizedBox(width: 24),
-                        _StatItem(count: '42', label: 'Following'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Pengalaman Kerja',
-                      style: TextStyle(
-                        fontSize: 18,
+                      userName,
+                      style: const TextStyle(
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const Divider(),
-                  Expanded(
-                    child: ListView.builder(
+                    const SizedBox(height: 8),
+                    Text(
+                      role,
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'NIM: $nim  •  Kelas: $kelas',
+                      style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (_error != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _error!,
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.email, color: Colors.teal),
+                        title: Text(user?.email ?? '-'),
+                        subtitle: Text('UID: ${user?.uid ?? '-'}'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const FcmTokenCard(),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _editNama,
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Edit Profil'),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.teal[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _StatItem(count: '15', label: 'Proyek'),
+                          SizedBox(width: 24),
+                          _StatItem(count: '1.2K', label: 'Followers'),
+                          SizedBox(width: 24),
+                          _StatItem(count: '42', label: 'Following'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Pengalaman Kerja',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Divider(),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: experiences.length,
                       itemBuilder: (context, index) {
                         return Card(
                           elevation: 2,
                           margin: const EdgeInsets.symmetric(vertical: 6),
                           child: ListTile(
-                            leading: const Icon(
-                              Icons.work,
-                              color: Colors.teal,
-                            ),
+                            leading: const Icon(Icons.work, color: Colors.teal),
                             title: Text(experiences[index]),
                           ),
                         );
                       },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
     );

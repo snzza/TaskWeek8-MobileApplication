@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
+import 'notification_service.dart';
 import 'screens/home_page.dart';
 import 'screens/login_page.dart';
 
@@ -25,7 +27,17 @@ Future<void> main() async {
     initError = e.toString();
   }
 
+  // Daftarkan handler untuk pesan saat aplikasi background / mati.
+  if (initError == null && !kIsWeb) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
+
   runApp(MyApp(initError: initError));
+
+  // Inisialisasi notifikasi (izin, token, listener).
+  if (initError == null && !kIsWeb) {
+    await NotificationService.init();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -75,6 +87,7 @@ class MyApp extends StatelessWidget {
     }
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Firebase Agit',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
